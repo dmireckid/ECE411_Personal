@@ -82,22 +82,31 @@ initial begin
             //dut.reset_n_i <= 1'b0;
         end
      end
+
      reset();
      ##5;
      itf.multiplicand <= $urandom();
      itf.multiplier <= $urandom();
      starter();
-     @(tb_clk iff (dut.ms.op==3'b0 || dut.ms.op==3'b011));
+     @(tb_clk iff (dut.ms.op==3'b011));
      starter();
      @(tb_clk iff dut.ready_o);
+
      reset();
      ##(5);
      itf.multiplicand <= $urandom();
      itf.multiplier <= $urandom();
      starter();
-     @(tb_clk iff (dut.ms.op==3'b101 || dut.ms.op==3'b110));
+     @(tb_clk iff (dut.ms.op==3'b101));
      reset();
 
+     reset();
+     ##(5);
+     itf.multiplicand <= $urandom();
+     itf.multiplier <= $urandom();
+     starter();
+     @(tb_clk iff (dut.ms.op==3'b110));
+     reset();
     /*******************************************************************/
     itf.finish(); // Use this finish task in order to let grading harness
                   // complete in process and/or scheduled operations

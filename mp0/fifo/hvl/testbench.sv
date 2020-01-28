@@ -40,6 +40,19 @@ initial begin
     reset();
     /************************ Your Code Here ***********************/
     // Feel free to make helper tasks / functions, initial / always blocks, etc.
+    dut.reset_n_i <= 1'b0;
+    ##(5);
+    dut.reset_n_i <= 1'b1;
+    @(tb_clk iff dut.ready_o);
+    dut.valid_i <= 1'b1;
+    for(int i=0; i<256; i=i+1) begin
+        dut.data_i <= i;
+        @(tb_clk);
+    end
+    dut.valid_i <= 1'b0;
+    @(tb_clk iff dut.valid_o);
+    dut.yumi_i <= 1'b1;
+    @(tb_clk iff valid_o);
 
 
     /***************************************************************/

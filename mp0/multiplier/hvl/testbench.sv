@@ -38,12 +38,66 @@ function void report_error(error_e error);
     itf.tb_report_dut_error(error);
 endfunction : report_error
 
+always @(tb_clk iff (dut.ms.op==3'b011)) begin
+    assert (dut.product_o == dut.multiplier_i*dut.multiplicand_i)
+        else begin
+            $error ("%0d: %0t: BAD_PRODUCT error detected", `__LINE__, $time);
+            report_error (BAD_PRODUCT);
+        end
+    assert (dut.ready_o)
+        else begin
+            $error ("%0d: %0t: NOT_READY error detected", `__LINE__, $time);
+            report_error (NOT_READY);
+        end
+end
+
+always @(tb_clk iff (dut.reset_n_i==1'b0)) begin
+    assert (dut.ready_o)
+        else begin
+            $error ("%0d: %0t: NOT_READY error detected", `__LINE__, $time);
+            report_error (NOT_READY);
+        end
+end
 
 initial itf.reset_n = 1'b0;
 initial begin
     reset();
     /********************** Your Code Here *****************************/
-    
+    for(int i=0; i<256; i=i+1) begin
+        for(int j=0; j<256; j=j+1) begin
+            ##(5);
+            dut.reset_n_i <= 1'b1;
+            dut.multiplicand_i <= i;
+            dut.multiplier_i <= j;
+            dut.start_i <= 1'b1;
+            @(tb_clk);
+            dut.start_i <= 1'b0;
+            @(tb_clk iff dut.done_o);
+            dut.reset_n_i <= 1'b0;
+        end
+     end
+     ##(5);
+     dut.reset_n_i <= 1'b1;
+     dut.multiplicand_i <= $urandom(0,255);
+     dut.multiplier_i <= $urandom(0,255);
+     dut.start_i <= 1'b1;
+     @(tb_clk);
+     dut.start_i <= 1'b0;
+     @(tb_clk iff (dut.ms.op==3'b0 || dut.ms.op==3'b011);
+     dut.start_i <= 1'b1;
+
+     @(tb_clk iff dut.done_o);
+     dut.reset_i <= 1'b0;
+     ##(5);
+     dut.reset_i <= 1'b1;
+
+     dut.multiplicand_i <= $urandom(0,255);
+     dut.multiplier_i <= $urandom(0,255);
+     dut.start_i <= 1'b1;
+     @(tb_clk iff (dut.ms.op==3'b101 || dut.ms.op==3'b110);
+     dut.reset_n_i <= 1'b0;
+     ##(5);
+     dut.reset_n_i <= 1'b1;
 
     /*******************************************************************/
     itf.finish(); // Use this finish task in order to let grading harness

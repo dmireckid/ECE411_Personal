@@ -32,6 +32,13 @@ task reset();
     ##1;
 endtask : reset
 
+task starter();
+    itf.start <= 1'b1;
+    ##5;
+    itf.start <= 1'b0;
+    ##1;
+endtask : starter
+
 // error_e defined in package mult_types in file ../include/types.sv
 // Asynchronously reports error in DUT to grading harness
 function void report_error(error_e error);
@@ -67,39 +74,27 @@ initial begin
     for(int i=0; i<256; i=i+1) begin
         for(int j=0; j<256; j=j+1) begin
             reset();
-            ##(5);
-            dut.multiplicand_i <= i;
-            dut.multiplier_i <= j;
-            dut.start_i <= 1'b1;
-            ##(5);
-            dut.start_i <= 1'b0;
-            ##1;
+            ##5;
+            itf.multiplicand = i;
+            itf.multiplier = j;
+            starter();
             @(tb_clk iff dut.ready_o);
             //dut.reset_n_i <= 1'b0;
         end
      end
      reset();
-     ##(5);
-     dut.multiplicand_i <= $urandom(0,255);
-     dut.multiplier_i <= $urandom(0,255);
-     dut.start_i <= 1'b1;
-     ##(5);
-     dut.start_i <= 1'b0;
-     ##(1);
+     ##5;
+     itf.multiplicand <= $urandom();
+     itf.multiplier <= $urandom();
+     starter();
      @(tb_clk iff (dut.ms.op==3'b0 || dut.ms.op==3'b011));
-     dut.start_i <= 1'b1;
-     ##(5);
-     dut.start_i <= 1'b0;
-     ##1;
+     starter();
      @(tb_clk iff dut.ready_o);
      reset();
      ##(5);
-     dut.multiplicand_i <= $urandom(0,255);
-     dut.multiplier_i <= $urandom(0,255);
-     dut.start_i <= 1'b1;
-     ##(5);
-     dut.start_i <= 1'b0;
-     ##1;
+     itf.multiplicand <= $urandom();
+     itf.multiplier <= $urandom();
+     starter();
      @(tb_clk iff (dut.ms.op==3'b101 || dut.ms.op==3'b110));
      reset();
 

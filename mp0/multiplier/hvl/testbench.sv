@@ -60,44 +60,48 @@ always @(tb_clk iff (dut.reset_n_i==1'b0)) begin
 end
 
 initial itf.reset_n = 1'b0;
+initial itf.start = 1'b0;
 initial begin
     reset();
     /********************** Your Code Here *****************************/
     for(int i=0; i<256; i=i+1) begin
         for(int j=0; j<256; j=j+1) begin
+            reset();
             ##(5);
-            dut.reset_n_i <= 1'b1;
             dut.multiplicand_i <= i;
             dut.multiplier_i <= j;
             dut.start_i <= 1'b1;
-            @(tb_clk);
+            ##(5);
             dut.start_i <= 1'b0;
-            @(tb_clk iff dut.done_o);
-            dut.reset_n_i <= 1'b0;
+            ##1;
+            @(tb_clk iff dut.ready_o);
+            //dut.reset_n_i <= 1'b0;
         end
      end
+     reset();
      ##(5);
-     dut.reset_n_i <= 1'b1;
      dut.multiplicand_i <= $urandom(0,255);
      dut.multiplier_i <= $urandom(0,255);
      dut.start_i <= 1'b1;
-     @(tb_clk);
+     ##(5);
      dut.start_i <= 1'b0;
-     @(tb_clk iff (dut.ms.op==3'b0 || dut.ms.op==3'b011);
+     ##(1);
+     @(tb_clk iff (dut.ms.op==3'b0 || dut.ms.op==3'b011));
      dut.start_i <= 1'b1;
-
-     @(tb_clk iff dut.done_o);
-     dut.reset_i <= 1'b0;
      ##(5);
-     dut.reset_i <= 1'b1;
-
+     dut.start_i <= 1'b0;
+     ##1;
+     @(tb_clk iff dut.ready_o);
+     reset();
+     ##(5);
      dut.multiplicand_i <= $urandom(0,255);
      dut.multiplier_i <= $urandom(0,255);
      dut.start_i <= 1'b1;
-     @(tb_clk iff (dut.ms.op==3'b101 || dut.ms.op==3'b110);
-     dut.reset_n_i <= 1'b0;
      ##(5);
-     dut.reset_n_i <= 1'b1;
+     dut.start_i <= 1'b0;
+     ##1;
+     @(tb_clk iff (dut.ms.op==3'b101 || dut.ms.op==3'b110));
+     reset();
 
     /*******************************************************************/
     itf.finish(); // Use this finish task in order to let grading harness

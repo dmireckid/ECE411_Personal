@@ -25,10 +25,25 @@ endtask
 // DO NOT MODIFY CODE ABOVE THIS LINE
 
 task write(input key_t key, input val_t val);
+    itf.rw_n <= 1'b0;
+    itf.key <= key;
+    itf.val_i <= val;
+    @(tb_clk);
+    itf.valid_i <= 1'b1;
 endtask
 
-task read(input key_t key, output val_t val);
+task read(input key_t key);
+    itf.rw_n <= 1'b1;
+    itf.key <= key;
+    @(tb_clk);
+    itf.valid_i <= 1'b1;
 endtask
+
+always @(tb_clk iff (itf.valid_i && itf.rw_n))
+    assert(itf.valid_o)
+        else begin
+            itf.tb_report_dut_error(READ_ERROR);
+        end
 
 initial begin
     $display("Starting CAM Tests");
@@ -38,7 +53,30 @@ initial begin
     // Feel free to make helper tasks / functions, initial / always blocks, etc.
     // Consider using the task skeltons above
     // To report errors, call itf.tb_report_dut_error in cam/include/cam_itf.sv
+    for(int i=0; i<8; i=i+1) begin
+        ##3;
+        write(i, $urandom());
+    end
+    ##1;
+    for(int j=8; j<16; j=j+1) begin
+        ##3;
+        write(j, $urandom());
+    end
+    ##1;
 
+    for(int k=8; k<16; k=k+1) begin
+        ##3;
+        read(k);
+    end
+    ##1;
+
+    write(21, $urandom());
+    write(21, $urandom());
+
+    ##3;
+
+    write(22, $urandom());
+    read(22);
 
     /**********************************************************************/
 

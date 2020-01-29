@@ -36,11 +36,12 @@ endfunction : report_error
 
 // DO NOT MODIFY CODE ABOVE THIS LINE
 
+
 initial begin
     reset();
     /************************ Your Code Here ***********************/
     // Feel free to make helper tasks / functions, initial / always blocks, etc.
-    reset();
+    $display("Running- enqueuing");
     @(tb_clk iff dut.ready_o);
     itf.valid_i <= 1'b1;
     for(int i=0; i<256; i=i+1) begin
@@ -48,9 +49,31 @@ initial begin
         @(tb_clk);
     end
     itf.valid_i <= 1'b0;
-    @(tb_clk iff dut.valid_o);
+    $display("Dequeuing");
+    ##15;
     itf.yumi <= 1'b1;
-    @(tb_clk iff dut.valid_o);
+    @(tb_clk iff !(dut.valid_o));
+    itf.yumi <= 1'b0;
+    reset();
+
+    $display("Simultaneous En+De");
+    for(int j=255; j>0; j=j-1) begin
+        @(tb_clk iff dut.ready_o);
+        itf.valid_i <= 1'b1;
+        for(int k=0; k<j; k=k+1) begin
+            itf.data_i <= k;
+            //$display("k= %d", k);
+            @(tb_clk);
+        end
+        itf.valid_i <= 1'b0;
+        ##10;
+        itf.valid_i <= 1'b1;
+        itf.yumi <= 1'b1;
+        @(tb_clk);
+        itf.valid_i <= 1'b0;
+        itf.yumi <= 1'b0;
+        reset();
+    end
 
 
     /***************************************************************/

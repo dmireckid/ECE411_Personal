@@ -36,6 +36,17 @@ endfunction : report_error
 
 // DO NOT MODIFY CODE ABOVE THIS LINE
 
+always @(tb_clk iff itf.reset_n)
+    assert(itf.rdy)
+        else begin
+            itf.tb_report_dut_error(RESET_DOES_NOT_CAUSE_READY_O);
+        end
+
+always @(tb_clk iff itf.yumi)
+    assert(itf.valid_o)
+        else begin
+            itf.tb_report_dut_error(INCORRECT_DATA_O_ON_YUMI_I);
+        end
 
 initial begin
     reset();

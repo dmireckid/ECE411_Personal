@@ -37,6 +37,7 @@ endfunction : report_error
 // DO NOT MODIFY CODE ABOVE THIS LINE
 
 always @(tb_clk iff itf.reset_n)
+    @(posedge itf.clk)
     assert(itf.rdy)
         else begin
             itf.tb_report_dut_error(RESET_DOES_NOT_CAUSE_READY_O);

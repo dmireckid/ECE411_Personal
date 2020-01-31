@@ -488,8 +488,8 @@ Adding Testbench in Quartus
 
 Under **Assignments → Settings...** add a new testbench with the following settings:
 
-- Test bench name: **top**
-- Top level module in test bench: **top**
+- Test bench name: **mp1_tb**
+- Top level module in test bench: **mp1_tb**
 - Simulation Period: **Run Simulation until all vector stimuli are used**
 
 Under the **Test bench and simulation files** section, add all of the files in the ``hvl/``

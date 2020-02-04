@@ -22,7 +22,10 @@ module control
     output logic load_regfile,
     output logic load_mar,
     output logic load_mdr,
-    output logic load_data_out
+    output logic load_data_out,
+    output logic mem_read,
+    output logic mem_write,
+    output rv32i_mem_wmask mem_byte_enable
 );
 
 /***************** USED BY RVFIMON --- ONLY MODIFY WHEN TOLD *****************/
@@ -88,6 +91,7 @@ enum int unsigned {
     fetch3,
     decode,
     imm,
+    reg,
     lui,
     calc_addr,
     ld1,
@@ -131,6 +135,10 @@ function void set_defaults();
     cmpmux_sel <= 1'b0;
     cmpop <= branch_funct3_t'(funct3);
     aluop <= alu_ops'(funct3);
+    mem_read <= 1'b0;
+    mem_write <= 1'b0;
+    mem_byte_enable <= 4'b1111;
+
 endfunction
 
 /**
@@ -177,17 +185,224 @@ begin : state_actions
     /* Default output assignments */
     set_defaults();
     /* Actions for each state */
+    case(state)
+        fetch1:
+            begin
+            load_mar = 1;
+            end
+        fetch2:
+            begin
+            load_mdr = 1;
+            mem_read = 1;
+            end
+        fetch3:
+            begin
+            load_ir = 1;
+            end
+        decode:
+        auipc:
+            begin
+            load_regfile = 1;
+            alumux1_sel = 1;
+            alumux2_sel = 1;
+            aluop = alu_add;
+            load_pc = 1;
+            end
+        imm:
+            begin
+            if(funct3 == slt)
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                cmpop = blt;
+                regfilemux_sel = 1;
+                cmpmux_sel = 1;
+                rs1_addr = rs1;
+                end
+
+            else if(funct3 == sltu)
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                cmpop = bltu;
+                regfilemux_sel = 1;
+                cmpmux_sel = 1;
+                rs1_addr = rs1;
+                end
+
+            else if((funct3 == sr) && (funct7 == 7'b0100000))
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                aluop = alu_sra;
+                rs1_addr = rs1;
+                end
+
+            else
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                aluop = alu_ops'(funct3);
+                rs1_addr = rs1;
+                end
+            end
+        br:
+            begin
+            pcmux_sel = br_en;
+            load_pc = 1;
+            alumux1_sel = 1;
+            alumux2_sel = 2;
+            aluop = alu_add;
+            rs1_addr = rs1;
+            rs2_addr = rs2;
+            end
+        lui:
+            begin
+            load_regfile = 1;
+            load_pc = 1;
+            regfilemux_sel = 2;
+            rs1_addr = rs1;
+            end
+        calc_addr:
+            begin
+            
+            if(opcode == op_load)
+                begin
+                aluop = alu_add;
+                load_mar = 1;
+                marmux_sel = 1;
+                end
+
+            else if(opcode == op_store)
+                begin
+                alumux2_sel = 3;
+                aluop = alu_add;
+                load_mar = 1;
+                load_data_out = 1;
+                marmux_sel = 1;
+                end
+            end
+        ld1:
+            begin
+            load_mdr = 1;
+            mem_read = 1;
+            end
+        ld2:
+            begin
+            regfilemux_sel = 3;
+            load_regfile = 1;
+            load_pc = 1;
+            rs1_addr = rs1;
+            end
+        st1:
+            begin
+            mem_write = 1;
+            end
+        st2:
+            begin
+            load_pc = 1;
+            rs1_addr = rs1;
+            rs2_addr = rs2;
+            end
+        reg:
+            begin
+            if(funct3 == slt)
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                cmpop = blt;
+                regfilemux_sel = 1;
+                cmpmux_sel = 1;
+                rs1_addr = rs1;
+                end
+
+            else if(funct3 == sltu)
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                cmpop = bltu;
+                regfilemux_sel = 1;
+                cmpmux_sel = 1;
+                rs1_addr = rs1;
+                end
+
+            else if((funct3 == sr) && (funct7 == 7'b0100000))
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                aluop = alu_sra;
+                rs1_addr = rs1;
+                end
+
+            else
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                aluop = alu_ops'(funct3);
+                rs1_addr = rs1;
+                end
+            end
+        default:
+    endcase
+
 end
 
 always_comb
 begin : next_state_logic
     /* Next state information and conditions (if any)
      * for transitioning between states */
+     next_state = state;
+     case(state)
+        fetch1: 
+            next_state = fetch2;
+        fetch2: 
+            next_state = fetch3;
+        fetch3:
+            next_state = decode;
+        decode:
+            begin
+            case(opcode)
+                op_lui: next_state = lui;
+                op_auipc: next_state = auipc;
+                op_jal:  
+                op_jalr: 
+                op_br: next_state = br;
+                op_load: next_state = calc_addr;
+                op_store: next_state = calc_addr;
+                op_imm: next_state = imm;
+                op_reg: next_state = reg;
+                op_csr:
+                default:
+            encase
+            end
+        lui:
+            next_state = fetch1;
+        auipc:
+            next_state = fetch1;
+        br:
+            next_state = fetch1;
+        ld1:
+            next_state = ld2;
+        ld2:
+            next_state = fetch1;
+        st1:
+            next_state = st2;
+        st2:
+            next_state = fetch1;
+        imm:
+            next_state = fetch1;
+        reg:
+            next_state = fetch1;
+        default:
+            next_state = fetch1;
+
+     endcase
 end
 
 always_ff @(posedge clk)
 begin: next_state_assignment
     /* Assignment of next state on clock edge */
+    state <= next_state;
 end
 
 endmodule : control

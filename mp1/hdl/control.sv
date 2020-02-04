@@ -83,6 +83,19 @@ end
 
 enum int unsigned {
     /* List of states */
+    fetch1,
+    fetch2,
+    fetch3,
+    decode,
+    imm,
+    lui,
+    calc_addr,
+    ld1,
+    ld2,
+    st1,
+    st2,
+    auipc,
+    br
 } state, next_states;
 
 /************************* Function Definitions *******************************/
@@ -104,6 +117,20 @@ enum int unsigned {
  *   and then call it at the beginning of your always_comb block.
 **/
 function void set_defaults();
+    load_pc <= 1'b0;
+    load_ir <= 1'b0;
+    load_regfile <= 1'b0;
+    load_mar <= 1'b0;
+    load_mdr <= 1'b0;
+    load_data_out <= 1'b0;
+    pcmux_sel <= 1'b0;
+    alumux1_sel <= 1'b0;
+    alumux2_sel <= 2'b00;
+    regfilemux_sel <= 2'b00;
+    marmux_sel <= 1'b0;
+    cmpmux_sel <= 1'b0;
+    cmpop <= branch_funct3_t'(funct3);
+    aluop <= alu_ops'(funct3);
 endfunction
 
 /**

@@ -6,20 +6,76 @@ module datapath
 (
     input clk,
     input rst,
+    input load_pc,
+    input load_ir,
+    input load_regfile,
+    input load_mar,
     input load_mdr,
+    input load_data_out,
+    input pcmux_sel_t pcmux_sel,
+    input alumux1_sel_t alumux1_sel,
+    input alumux2_sel_t alumux2_sel,
+    input regfilemux_sel_t regfilemux_sel,
+    input marmux_sel_t marmux_sel,
+    input cmpmux_sel,
+    input alu_ops aluop,
+    input branch_funct3_t cmpop,
     input rv32i_word mem_rdata,
     output rv32i_word mem_wdata, // signal used by RVFI Monitor
+    output rv32i_word mem_address,
+    output rv32i_opcode opcode,
+    output [2:0] funct3,
+    output [6:0] funct7,
+    output br_en
 );
 
 /******************* Signals Needed for RVFI Monitor *************************/
+rv32i_reg rs1;
+rv32i_reg rs2;
+rv32i_reg rd;
+rv32i_word rs1_out;
+rv32i_word rs2_out;
+rv32i_word i_imm;
+rv32i_word u_imm;
+rv32i_word b_imm;
+rv32i_word s_imm;
+rv32i_word j_imm;
 rv32i_word pcmux_out;
+rv32i_word alumux1_out;
+rv32i_word alumux2_out;
+rv32i_word regfilemux_out;
+rv32i_word marmux_out;
+rv32i_word cmp_mux_out;
+rv32i_word alu_out;
+rv32i_word pc_out;
+rv32i_word pc_plus4_out;
 rv32i_word mdrreg_out;
+rv32i_word zext_br;
+
+assign pc_plus4_out = pc_out+4;
+assign zext_br = {31'd0, br_en};
 /*****************************************************************************/
 
 
 /***************************** Registers *************************************/
 // Keep Instruction register named `IR` for RVFI Monitor
-ir IR();
+ir IR(
+    .clk(clk),
+    .rst(rst),
+    .load(load_ir),
+    .in(mdrreg_out),
+    .funct3(funct3),
+    .funct7(funct7),
+    .opcode(opcode),
+    .i_imm(i_imm),
+    .s_imm(s_imm),
+    .b_imm(b_imm),
+    .u_imm(u_imm),
+    .j_imm(j_imm),
+    .rs1(rs1),
+    .rs2(rs2),
+    .rd(rd)
+);
 
 register MDR(
     .clk  (clk),
@@ -28,6 +84,56 @@ register MDR(
     .in   (mem_rdata),
     .out  (mdrreg_out)
 );
+
+register MAR(
+    .clk(clk),
+    .rst(rst),
+    .in(marmux_out),
+    .out(mem_address)
+);
+
+alu ALU(
+    .aluop(aluop),
+    .a(alumux1_out),
+    .b(alumux2_out),
+    .f(alu_out)
+);
+
+pc_register PC(
+    .clk(clk),
+    .rst(rst),
+    .load(load_pc),
+    .in(pcmux_out),
+    .out(pc_out)
+);
+
+regfile REGFILE(
+    .clk(clk),
+    .rst(rst),
+    .load(load_regfile),
+    .in(regfilemux_out),
+    .src_a(rs1),
+    .src_b(rs2),
+    .dest(rd),
+    .reg_a(rs1_out),
+    .reg_b(rs2_out)
+);
+
+cmp CMP(
+    .cmpop(cmpop),
+    .cmpmux_o(cmpmux_out),
+    .rs1_o(rs1_out),
+    .br_en(br_en)
+);
+
+register MEM_DATA_OUT(
+    .clk(clk),
+    .load(load_data_out),
+    .in(rs2_out),
+    .out(mem_wdata)
+);
+
+
 
 /*****************************************************************************/
 
@@ -42,11 +148,58 @@ always_comb begin : MUXES
     // useful in SystemVerilog.  In this case, we actually use 
     // Offensive programming --- making simulation halt with a fatal message
     // warning when an unexpected mux select value occurs
-    unique case (pcmux_sel)
-        pcmux::pc_plus4: pcumux_out = pc_out + 4;
+    //unique case (pcmux_sel)
+    //    pcmux::pc_plus4: pcumux_out = pc_out + 4;
         // etc.
-        default: `BAD_MUX_SEL;
-    endcase
+    //    default: `BAD_MUX_SEL;
+    //endcase
 end
+
+twomux pcmux(
+    .select(pcmux_sel),
+    .a(pc_plus4_out),
+    .b(alu_out),
+    .f(pcmux_out)
+);
+
+twomux alumux1(
+    .select(alumux1_sel),
+    .a(rs1_out),
+    .b(pc_out),
+    .f(alumux1_out)
+);
+
+fourmux alumux2(
+    .select(alumux2_sel),
+    .a(i_imm),
+    .b(u_imm),
+    .c(b_imm),
+    .d(s_imm),
+    .f(alumux2_out)
+);
+
+twomux cmpmux(
+    .select(cmpmux_sel),
+    .a(rs2_out),
+    .b(i_imm),
+    .f(cmpmux_out)
+);
+
+twomux marmux(
+    .select(marmux_sel),
+    .a(pc_out),
+    .b(alu_out),
+    .f(marmux_out)
+);
+
+fourmux regfilemux(
+    .select(regfilemux_sel),
+    .a(alu_out),
+    .b(zext_br),
+    .c(u_imm),
+    .d(mdrreg_out),
+    .f(regfilemux_out)
+);
+
 /*****************************************************************************/
 endmodule : datapath

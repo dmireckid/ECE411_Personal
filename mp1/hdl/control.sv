@@ -91,7 +91,7 @@ enum int unsigned {
     fetch3,
     decode,
     imm,
-    reg,
+    regreg,
     lui,
     calc_addr,
     ld1,
@@ -304,7 +304,7 @@ begin : state_actions
             rs1_addr = rs1;
             rs2_addr = rs2;
             end
-        reg:
+        regreg:
             begin
             if(funct3 == slt)
                 begin
@@ -364,16 +364,16 @@ begin : next_state_logic
             case(opcode)
                 op_lui: next_state = lui;
                 op_auipc: next_state = auipc;
-                op_jal:  
-                op_jalr: 
+
                 op_br: next_state = br;
                 op_load: next_state = calc_addr;
                 op_store: next_state = calc_addr;
                 op_imm: next_state = imm;
-                op_reg: next_state = reg;
-                op_csr:
+                op_reg: next_state = regreg;
                 default:
-            encase
+                    begin
+                    end
+            endcase
             end
         lui:
             next_state = fetch1;
@@ -391,7 +391,7 @@ begin : next_state_logic
             next_state = fetch1;
         imm:
             next_state = fetch1;
-        reg:
+        regreg:
             next_state = fetch1;
         default:
             next_state = fetch1;

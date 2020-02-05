@@ -18,9 +18,9 @@ assign eql = (rs1_o==cmpmux_o);
 assign less = ($signed(rs1_o) < $signed(cmpmux_o));
 assign uless = (rs1_o < cmpmux_o);
 
-fourmux #(width (1)) cmpmux(
+fourmux #(.width (1)) cmpmux(
 	.select(cmd[2:1]),
-	.a(equal),
+	.a(eql),
 	.b(1'bx),
 	.c(less),
 	.d(uless),

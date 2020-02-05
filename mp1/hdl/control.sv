@@ -10,6 +10,7 @@ module control
     input logic br_en,
     input logic [4:0] rs1,
     input logic [4:0] rs2,
+	input mem_resp,
     output pcmux::pcmux_sel_t pcmux_sel,
     output alumux::alumux1_sel_t alumux1_sel,
     output alumux::alumux2_sel_t alumux2_sel,
@@ -25,7 +26,8 @@ module control
     output logic load_data_out,
     output logic mem_read,
     output logic mem_write,
-    output rv32i_mem_wmask mem_byte_enable
+    output rv32i_mem_wmask mem_byte_enable,
+	output branch_funct3_t cmpop
 );
 
 /***************** USED BY RVFIMON --- ONLY MODIFY WHEN TOLD *****************/
@@ -100,7 +102,7 @@ enum int unsigned {
     st2,
     auipc,
     br
-} state, next_states;
+} state, next_state;
 
 /************************* Function Definitions *******************************/
 /**
@@ -121,23 +123,23 @@ enum int unsigned {
  *   and then call it at the beginning of your always_comb block.
 **/
 function void set_defaults();
-    load_pc <= 1'b0;
-    load_ir <= 1'b0;
-    load_regfile <= 1'b0;
-    load_mar <= 1'b0;
-    load_mdr <= 1'b0;
-    load_data_out <= 1'b0;
-    pcmux_sel <= 1'b0;
-    alumux1_sel <= 1'b0;
-    alumux2_sel <= 2'b00;
-    regfilemux_sel <= 2'b00;
-    marmux_sel <= 1'b0;
-    cmpmux_sel <= 1'b0;
-    cmpop <= branch_funct3_t'(funct3);
-    aluop <= alu_ops'(funct3);
-    mem_read <= 1'b0;
-    mem_write <= 1'b0;
-    mem_byte_enable <= 4'b1111;
+    load_pc = 1'b0;
+    load_ir = 1'b0;
+    load_regfile = 1'b0;
+    load_mar = 1'b0;
+    load_mdr = 1'b0;
+    load_data_out = 1'b0;
+    pcmux_sel = pcmux::pc_plus4;
+    alumux1_sel = alumux::rs1_out;
+    alumux2_sel = alumux::i_imm;
+    regfilemux_sel = regfilemux::alu_out;
+    marmux_sel = marmux::pc_out;
+    cmpmux_sel = cmpmux::rs2_out;
+    cmpop = branch_funct3_t'(funct3);
+    aluop = alu_ops'(funct3);
+    mem_read = 1'b0;
+    mem_write = 1'b0;
+    mem_byte_enable = 4'b1111;
 
 endfunction
 
@@ -203,8 +205,8 @@ begin : state_actions
         auipc:
             begin
             load_regfile = 1;
-            alumux1_sel = 1;
-            alumux2_sel = 1;
+            alumux1_sel = alumux::pc_out;
+            alumux2_sel = alumux::u_imm;
             aluop = alu_add;
             load_pc = 1;
             end
@@ -215,8 +217,8 @@ begin : state_actions
                 load_regfile = 1;
                 load_pc = 1;
                 cmpop = blt;
-                regfilemux_sel = 1;
-                cmpmux_sel = 1;
+                regfilemux_sel = regfilemux::br_en;
+                cmpmux_sel = cmpmux::i_imm;
                 rs1_addr = rs1;
                 end
 
@@ -225,8 +227,8 @@ begin : state_actions
                 load_regfile = 1;
                 load_pc = 1;
                 cmpop = bltu;
-                regfilemux_sel = 1;
-                cmpmux_sel = 1;
+                regfilemux_sel = regfilemux::br_en;
+                cmpmux_sel = cmpmux::i_imm;
                 rs1_addr = rs1;
                 end
 
@@ -248,10 +250,10 @@ begin : state_actions
             end
         br:
             begin
-            pcmux_sel = br_en;
+            pcmux_sel = pcmux::pc_plus4;
             load_pc = 1;
-            alumux1_sel = 1;
-            alumux2_sel = 2;
+            alumux1_sel = alumux::pc_out;
+            alumux2_sel = alumux::b_imm;
             aluop = alu_add;
             rs1_addr = rs1;
             rs2_addr = rs2;
@@ -260,7 +262,7 @@ begin : state_actions
             begin
             load_regfile = 1;
             load_pc = 1;
-            regfilemux_sel = 2;
+            regfilemux_sel = regfilemux::u_imm;
             rs1_addr = rs1;
             end
         calc_addr:
@@ -270,16 +272,16 @@ begin : state_actions
                 begin
                 aluop = alu_add;
                 load_mar = 1;
-                marmux_sel = 1;
+                marmux_sel = marmux::alu_out;
                 end
 
             else if(opcode == op_store)
                 begin
-                alumux2_sel = 3;
+                alumux2_sel = alumux::s_imm;
                 aluop = alu_add;
                 load_mar = 1;
                 load_data_out = 1;
-                marmux_sel = 1;
+                marmux_sel = marmux::alu_out;
                 end
             end
         ld1:
@@ -289,7 +291,7 @@ begin : state_actions
             end
         ld2:
             begin
-            regfilemux_sel = 3;
+            regfilemux_sel = regfilemux::lw;
             load_regfile = 1;
             load_pc = 1;
             rs1_addr = rs1;
@@ -311,8 +313,8 @@ begin : state_actions
                 load_regfile = 1;
                 load_pc = 1;
                 cmpop = blt;
-                regfilemux_sel = 1;
-                cmpmux_sel = 1;
+                regfilemux_sel = regfilemux::br_en;
+                cmpmux_sel = cmpmux::i_imm;
                 rs1_addr = rs1;
                 end
 
@@ -321,8 +323,8 @@ begin : state_actions
                 load_regfile = 1;
                 load_pc = 1;
                 cmpop = bltu;
-                regfilemux_sel = 1;
-                cmpmux_sel = 1;
+                regfilemux_sel = regfilemux::br_en;
+                cmpmux_sel = cmpmux::i_imm;
                 rs1_addr = rs1;
                 end
 
@@ -343,6 +345,8 @@ begin : state_actions
                 end
             end
         default:
+			begin
+			end
     endcase
 
 end
@@ -356,7 +360,7 @@ begin : next_state_logic
         fetch1: 
             next_state = fetch2;
         fetch2: 
-            next_state = fetch3;
+			if(mem_resp) next_state = fetch3;
         fetch3:
             next_state = decode;
         decode:
@@ -382,11 +386,11 @@ begin : next_state_logic
         br:
             next_state = fetch1;
         ld1:
-            next_state = ld2;
+            if(mem_resp) next_state = ld2;
         ld2:
             next_state = fetch1;
         st1:
-            next_state = st2;
+            if(mem_resp) next_state = st2;
         st2:
             next_state = fetch1;
         imm:

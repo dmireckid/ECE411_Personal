@@ -16,6 +16,18 @@ module mp1
 /******************* Signals Needed for RVFI Monitor *************************/
 logic load_pc;
 logic load_regfile;
+logic load_ir;
+logic load_mar;
+logic load_mdr;
+logic load_data_out;
+alu_ops aluop;
+branch_funct3_t cmpop;
+rv32i_opcode opcode;
+logic [2:0] funct3;
+logic [6:0] funct7;
+logic br_en;
+rv32i_reg rs1;
+rv32i_reg rs2;
 /*****************************************************************************/
 
 /**************************** Control Signals ********************************/

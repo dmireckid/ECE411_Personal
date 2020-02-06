@@ -356,7 +356,7 @@ begin : state_actions
                 load_regfile = 1;
                 load_pc = 1;
                 aluop = alu_ops'(funct3);
-                rs1_addr = rs1;
+                //rs1_addr = rs1;
                 end
             end
         default: ;

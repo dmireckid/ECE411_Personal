@@ -88,6 +88,7 @@ register MDR(
 register MAR(
     .clk(clk),
     .rst(rst),
+    .load(load_mar),
     .in(marmux_out),
     .out(mem_address)
 );

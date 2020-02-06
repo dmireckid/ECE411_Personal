@@ -219,7 +219,7 @@ begin : state_actions
                 cmpop = blt;
                 regfilemux_sel = regfilemux::br_en;
                 cmpmux_sel = cmpmux::i_imm;
-                rs1_addr = rs1;
+                //rs1_addr = rs1;
                 end
 
             else if(funct3 == sltu)
@@ -229,7 +229,7 @@ begin : state_actions
                 cmpop = bltu;
                 regfilemux_sel = regfilemux::br_en;
                 cmpmux_sel = cmpmux::i_imm;
-                rs1_addr = rs1;
+                //rs1_addr = rs1;
                 end
 
             else if((funct3 == sr) && (funct7 == 7'b0100000))
@@ -237,7 +237,7 @@ begin : state_actions
                 load_regfile = 1;
                 load_pc = 1;
                 aluop = alu_sra;
-                rs1_addr = rs1;
+                //rs1_addr = rs1;
                 end
 
             else
@@ -245,7 +245,7 @@ begin : state_actions
                 load_regfile = 1;
                 load_pc = 1;
                 aluop = alu_ops'(funct3);
-                rs1_addr = rs1;
+                //rs1_addr = rs1;
                 end
             end
         br:
@@ -255,15 +255,15 @@ begin : state_actions
             alumux1_sel = alumux::pc_out;
             alumux2_sel = alumux::b_imm;
             aluop = alu_add;
-            rs1_addr = rs1;
-            rs2_addr = rs2;
+            //rs1_addr = rs1;
+            //rs2_addr = rs2;
             end
         lui:
             begin
             load_regfile = 1;
             load_pc = 1;
             regfilemux_sel = regfilemux::u_imm;
-            rs1_addr = rs1;
+            //rs1_addr = rs1;
             end
         calc_addr:
             begin
@@ -294,7 +294,7 @@ begin : state_actions
             regfilemux_sel = regfilemux::lw;
             load_regfile = 1;
             load_pc = 1;
-            rs1_addr = rs1;
+            //rs1_addr = rs1;
             end
         st1:
             begin
@@ -303,8 +303,8 @@ begin : state_actions
         st2:
             begin
             load_pc = 1;
-            rs1_addr = rs1;
-            rs2_addr = rs2;
+            //rs1_addr = rs1;
+            //rs2_addr = rs2;
             end
         regreg:
             begin
@@ -314,8 +314,9 @@ begin : state_actions
                 load_pc = 1;
                 cmpop = blt;
                 regfilemux_sel = regfilemux::br_en;
-                cmpmux_sel = cmpmux::i_imm;
-                rs1_addr = rs1;
+                cmpmux_sel = cmpmux::rs2_out;
+                alumux_sel = alumux::j_imm;
+                //rs1_addr = rs1;
                 end
 
             else if(funct3 == sltu)
@@ -325,15 +326,29 @@ begin : state_actions
                 cmpop = bltu;
                 regfilemux_sel = regfilemux::br_en;
                 cmpmux_sel = cmpmux::i_imm;
-                rs1_addr = rs1;
+                alumux_sel = alumux::j_imm;
+                //rs1_addr = rs1;
                 end
 
-            else if((funct3 == sr) && (funct7 == 7'b0100000))
+            else if(funct3 == sr)
                 begin
                 load_regfile = 1;
                 load_pc = 1;
-                aluop = alu_sra;
-                rs1_addr = rs1;
+                if(funct7 == 7'b0100000)
+                    aluop = alu_sra;
+                else
+                    aluop = alu_srl;
+                //rs1_addr = rs1;
+                end
+
+            else if(funct3 == add)
+                begin
+                load_regfile = 1;
+                load_pc = 1;
+                if(funct7 = 7'b0100000)
+                    aluop = alu_sub;
+                else
+                    aluop = alu_add;
                 end
 
             else
@@ -344,9 +359,7 @@ begin : state_actions
                 rs1_addr = rs1;
                 end
             end
-        default:
-			begin
-			end
+        default: ;
     endcase
 
 end

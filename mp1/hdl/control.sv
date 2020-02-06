@@ -315,7 +315,7 @@ begin : state_actions
                 cmpop = blt;
                 regfilemux_sel = regfilemux::br_en;
                 cmpmux_sel = cmpmux::rs2_out;
-                alumux_sel = alumux::j_imm;
+                alumux2_sel = alumux::j_imm;
                 //rs1_addr = rs1;
                 end
 
@@ -326,7 +326,7 @@ begin : state_actions
                 cmpop = bltu;
                 regfilemux_sel = regfilemux::br_en;
                 cmpmux_sel = cmpmux::i_imm;
-                alumux_sel = alumux::j_imm;
+                alumux2_sel = alumux::j_imm;
                 //rs1_addr = rs1;
                 end
 
@@ -345,7 +345,7 @@ begin : state_actions
                 begin
                 load_regfile = 1;
                 load_pc = 1;
-                if(funct7 = 7'b0100000)
+                if(funct7 == 7'b0100000)
                     aluop = alu_sub;
                 else
                     aluop = alu_add;

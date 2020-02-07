@@ -7,7 +7,7 @@ module twomux #(parameter width=32)(
 
 always_comb
 begin
-	if(select==1'b0) f=a;
+	if(select==0) f=a;
 	else f=b;
 end
 endmodule : twomux
@@ -23,9 +23,9 @@ module fourmux #(parameter width=32)(
 
 always_comb
 begin
-	if(select==2'b00) f=a;
-	else if(select==2'b01) f=b;
-	else if(select==2'b10) f=c;
+	if(select==0) f=a;
+	else if(select==1) f=b;
+	else if(select==2) f=c;
 	else f=d;
 end
 endmodule : fourmux

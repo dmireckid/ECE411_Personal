@@ -129,6 +129,7 @@ cmp CMP(
 
 register MEM_DATA_OUT(
     .clk(clk),
+	.rst(rst),
     .load(load_data_out),
     .in(rs2_out),
     .out(mem_wdata)

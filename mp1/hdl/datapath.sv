@@ -45,7 +45,7 @@ rv32i_word alumux1_out;
 rv32i_word alumux2_out;
 rv32i_word regfilemux_out;
 rv32i_word marmux_out;
-rv32i_word cmp_mux_out;
+rv32i_word cmpmux_out;
 rv32i_word alu_out;
 rv32i_word pc_out;
 rv32i_word pc_plus4_out;
@@ -171,13 +171,17 @@ twomux alumux1(
     .f(alumux1_out)
 );
 
-fourmux alumux2(
+eightmux alumux2(
     .select(alumux2_sel),
     .a(i_imm),
     .b(u_imm),
     .c(b_imm),
     .d(s_imm),
-    .f(alumux2_out)
+	.e(rs2_out),
+	.f(j_imm),
+	.g(),
+	.h(),
+    .i(alumux2_out)
 );
 
 twomux cmpmux(
@@ -194,13 +198,25 @@ twomux marmux(
     .f(marmux_out)
 );
 
-fourmux regfilemux(
+sixmux regfilemux(
     .select(regfilemux_sel),
     .a(alu_out),
     .b(zext_br),
     .c(u_imm),
-    .d(mdrreg_out),
-    .f(regfilemux_out)
+	.d(mdrreg_out),
+	.e(pc_plus4_out),
+    .f({{17{mdrreg_out[15]}},mdrreg_out[14:0]}),
+	.g({16'd0, mdrreg_out[15:0]}),
+    .h({{25{mdrreg_out[7]}}, mdrreg_out[6:0]}),
+	.i({24'd0, mdrreg_out[7:0]}),
+	.j(),
+	.k(),
+	.l(),
+	.m(),
+	.n(),
+	.o(),
+	.p(),
+	.q(regfilemux_out)
 );
 
 /*****************************************************************************/

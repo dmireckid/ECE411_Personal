@@ -8,8 +8,8 @@ module control
     input logic [2:0] funct3,
     input logic [6:0] funct7,
     input logic br_en,
-    input logic [4:0] rs1,
-    input logic [4:0] rs2,
+    //input logic [4:0] rs1,
+    //input logic [4:0] rs2,
 	input mem_resp,
     output pcmux::pcmux_sel_t pcmux_sel,
     output alumux::alumux1_sel_t alumux1_sel,
@@ -34,6 +34,8 @@ module control
 logic trap;
 logic [4:0] rs1_addr, rs2_addr;
 logic [3:0] rmask, wmask;
+logic [4:0] rs1;
+logic [4:0] rs2;
 
 branch_funct3_t branch_funct3;
 store_funct3_t store_funct3;
@@ -140,6 +142,8 @@ function void set_defaults();
     mem_read = 1'b0;
     mem_write = 1'b0;
     mem_byte_enable = 4'b1111;
+	rs1 = 5'b0;
+	rs2 = 5'b0;
 
 endfunction
 
@@ -250,7 +254,7 @@ begin : state_actions
             end
         br:
             begin
-            pcmux_sel = pcmux::pc_plus4;
+            pcmux_sel = pcmux::pcmux_sel_t'(br_en);
             load_pc = 1;
             alumux1_sel = alumux::pc_out;
             alumux2_sel = alumux::b_imm;

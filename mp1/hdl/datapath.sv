@@ -54,6 +54,7 @@ rv32i_word zext_br;
 
 assign pc_plus4_out = pc_out+4;
 assign zext_br = {31'd0, br_en};
+assign alu_mod2 = {alu_out[31:1], 1'b0};
 /*****************************************************************************/
 
 
@@ -108,7 +109,7 @@ pc_register PC(
     .out(pc_out)
 );
 
-regfile REGFILE(
+regfile regfile(
     .clk(clk),
     .rst(rst),
     .load(load_regfile),
@@ -157,10 +158,12 @@ always_comb begin : MUXES
     //endcase
 end
 
-twomux pcmux(
+fourmux pcmux(
     .select(pcmux_sel),
     .a(pc_plus4_out),
     .b(alu_out),
+	.c(alu_mod2),
+	.d(),
     .f(pcmux_out)
 );
 

@@ -103,7 +103,9 @@ enum int unsigned {
     st1,
     st2,
     auipc,
-    br
+    br,
+	jal,
+	jalr
 } state, next_state;
 
 /************************* Function Definitions *******************************/
@@ -295,13 +297,20 @@ begin : state_actions
             end
         ld2:
             begin
-            regfilemux_sel = regfilemux::lw;
+			if(funct3 == lw) regfilemux_sel = regfilemux::lw;
+			else if(funct3 == lh) regfilemux_sel = regfilemux::lh;
+			else if(funct3 == lhu) regfilemux_sel = regfilemux::lhu;
+			else if(funct3 == lb) regfilemux_sel = regfilemux::lb;
+			else if(funct3 == lbu) regfilemux_sel = regfilemux::lbu;
             load_regfile = 1;
             load_pc = 1;
             //rs1_addr = rs1;
             end
         st1:
             begin
+			if(funct3 == sb) mem_byte_enable = 4'b0001;
+			else if(funct3 == sh) mem_byte_enable = 4'b0011;
+			else mem_byte_enable = 4'b1111;
             mem_write = 1;
             end
         st2:
@@ -363,6 +372,26 @@ begin : state_actions
                 //rs1_addr = rs1;
                 end
             end
+		jal:
+			begin
+			load_pc = 1;
+			load_regfile = 1;
+			regfilemux_sel = regfilemux::pc_plus4;
+			alumux1_sel = alumux::pc_out;
+			alumux2_sel = alumux::j_imm;
+			pcmux_sel = pcmux::alu_out;
+			aluop = alu_add;
+			end
+		jalr:
+			begin
+			load_pc = 1;
+			load_regfile = 1;
+			regfilemux_sel = regfilemux::pc_plus4;
+			alumux1_sel = alumux::rs1_out;
+			alumux2_sel = alumux::i_imm;
+			pcmux_sel = pcmux::alu_mod2;
+			aluop = alu_add;
+			end
         default: ;
     endcase
 
@@ -391,6 +420,8 @@ begin : next_state_logic
                 op_store: next_state = calc_addr;
                 op_imm: next_state = imm;
                 op_reg: next_state = regreg;
+				op_jal : next_state = jal;
+				op_jalr : next_state = jalr;
                 default:
                     begin
                     end
@@ -414,6 +445,10 @@ begin : next_state_logic
             next_state = fetch1;
         regreg:
             next_state = fetch1;
+		jal:
+			next_state = fetch1;
+		jalr:
+			next_state = fetch1;
         default:
             next_state = fetch1;
 

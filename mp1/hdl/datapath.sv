@@ -51,6 +51,7 @@ rv32i_word pc_out;
 rv32i_word pc_plus4_out;
 rv32i_word mdrreg_out;
 rv32i_word zext_br;
+rv32i_word alu_mod2;
 
 assign pc_plus4_out = pc_out+4;
 assign zext_br = {31'd0, br_en};

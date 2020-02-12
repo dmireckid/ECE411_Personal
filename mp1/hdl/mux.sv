@@ -18,7 +18,6 @@ module fourmux #(parameter width=32)(
 	input [width-1:0] b,
 	input [width-1:0] c,
 	input [width-1:0] d,
-	input jalr,
 	output logic [width-1:0] f
 );
 

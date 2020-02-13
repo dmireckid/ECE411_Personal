@@ -7,7 +7,7 @@ module control
     input rv32i_opcode opcode,
     input logic [2:0] funct3,
     input logic [6:0] funct7,
-    input logic br_en,
+    input br_en,
     //input logic [4:0] rs1,
     //input logic [4:0] rs2,
 	input mem_resp,
@@ -218,7 +218,7 @@ begin : state_actions
             end
         imm:
             begin
-            if(funct3 == slt)
+            if(arith_funct3 == slt)
                 begin
                 load_regfile = 1;
                 load_pc = 1;
@@ -228,7 +228,7 @@ begin : state_actions
                 //rs1_addr = rs1;
                 end
 
-            else if(funct3 == sltu)
+            else if(arith_funct3 == sltu)
                 begin
                 load_regfile = 1;
                 load_pc = 1;
@@ -238,7 +238,7 @@ begin : state_actions
                 //rs1_addr = rs1;
                 end
 
-            else if((funct3 == sr) && (funct7 == 7'b0100000))
+            else if((arith_funct3 == sr) && (funct7 == 7'b0100000))
                 begin
                 load_regfile = 1;
                 load_pc = 1;
@@ -297,19 +297,19 @@ begin : state_actions
             end
         ld2:
             begin
-			if(funct3 == lw) regfilemux_sel = regfilemux::lw;
-			else if(funct3 == lh) regfilemux_sel = regfilemux::lh;
-			else if(funct3 == lhu) regfilemux_sel = regfilemux::lhu;
-			else if(funct3 == lb) regfilemux_sel = regfilemux::lb;
-			else if(funct3 == lbu) regfilemux_sel = regfilemux::lbu;
+			if(load_funct3 == lw) regfilemux_sel = regfilemux::lw;
+			else if(load_funct3 == lh) regfilemux_sel = regfilemux::lh;
+			else if(load_funct3 == lhu) regfilemux_sel = regfilemux::lhu;
+			else if(load_funct3 == lb) regfilemux_sel = regfilemux::lb;
+			else if(load_funct3 == lbu) regfilemux_sel = regfilemux::lbu;
             load_regfile = 1;
             load_pc = 1;
             //rs1_addr = rs1;
             end
         st1:
             begin
-			if(funct3 == sb) mem_byte_enable = 4'b0001;
-			else if(funct3 == sh) mem_byte_enable = 4'b0011;
+			if(store_funct3 == sb) mem_byte_enable = 4'b0001;
+			else if(sotre_funct3 == sh) mem_byte_enable = 4'b0011;
 			else mem_byte_enable = 4'b1111;
             mem_write = 1;
             end
@@ -321,7 +321,7 @@ begin : state_actions
             end
         regreg:
             begin
-            if(funct3 == slt)
+            if(arith_funct3 == slt)
                 begin
                 load_regfile = 1;
                 load_pc = 1;
@@ -332,7 +332,7 @@ begin : state_actions
                 //rs1_addr = rs1;
                 end
 
-            else if(funct3 == sltu)
+            else if(arith_funct3 == sltu)
                 begin
                 load_regfile = 1;
                 load_pc = 1;
@@ -343,7 +343,7 @@ begin : state_actions
                 //rs1_addr = rs1;
                 end
 
-            else if(funct3 == sr)
+            else if(arith_funct3 == sr)
                 begin
                 load_regfile = 1;
                 load_pc = 1;
@@ -354,7 +354,7 @@ begin : state_actions
                 //rs1_addr = rs1;
                 end
 
-            else if(funct3 == add)
+            else if(arith_funct3 == add)
                 begin
                 load_regfile = 1;
                 load_pc = 1;

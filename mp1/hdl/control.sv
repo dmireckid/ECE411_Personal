@@ -309,7 +309,7 @@ begin : state_actions
         st1:
             begin
 			if(store_funct3 == sb) mem_byte_enable = 4'b0001;
-			else if(sotre_funct3 == sh) mem_byte_enable = 4'b0011;
+			else if(store_funct3 == sh) mem_byte_enable = 4'b0011;
 			else mem_byte_enable = 4'b1111;
             mem_write = 1;
             end

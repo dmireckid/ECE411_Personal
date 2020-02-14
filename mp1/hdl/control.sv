@@ -422,9 +422,7 @@ begin : next_state_logic
                 op_reg: next_state = regreg;
 				op_jal : next_state = jal;
 				op_jalr : next_state = jalr;
-                default:
-                    begin
-                    end
+                default: $display("Invalid opcode");
             endcase
             end
         lui:
@@ -449,6 +447,12 @@ begin : next_state_logic
 			next_state = fetch1;
 		jalr:
 			next_state = fetch1;
+        calc_addr:
+            begin
+            if(opcode == op_load) next_state = ld1;
+            else if(opcode == op_store) next_state = st1;
+            else $display("Invalid calc_addr state");
+            end
         default:
             next_state = fetch1;
 

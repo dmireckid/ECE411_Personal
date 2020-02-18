@@ -183,8 +183,8 @@ eightmux alumux2(
     .b(u_imm),
     .c(b_imm),
     .d(s_imm),
-	.e(rs2_out),
-	.f(j_imm),
+	.e(j_imm),
+	.f(rs2_out),
 	.g(),
 	.h(),
     .i(alumux2_out)

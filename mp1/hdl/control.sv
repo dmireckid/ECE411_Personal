@@ -103,7 +103,8 @@ enum int unsigned {
     auipc,
     br,
 	jal,
-	jalr
+	jalr,
+    rest
 } state, next_state;
 
 /************************* Function Definitions *******************************/
@@ -390,6 +391,8 @@ begin : state_actions
 			pcmux_sel = pcmux::alu_mod2;
 			aluop = alu_add;
 			end
+        rest:
+            set_defaults();
         default: ;
     endcase
 
@@ -399,7 +402,8 @@ always_comb
 begin : next_state_logic
     /* Next state information and conditions (if any)
      * for transitioning between states */
-     next_state = state;
+     if(rst) next_state = rest;
+     else next_state = state;
      case(state)
         fetch1: 
             next_state = fetch2;
@@ -450,6 +454,10 @@ begin : next_state_logic
             if(opcode == op_load) next_state = ld1;
             else if(opcode == op_store) next_state = st1;
             else $display("Invalid calc_addr state");
+            end
+        rest:
+            begin
+            next_state = fetch1;
             end
         default:
             next_state = fetch1;

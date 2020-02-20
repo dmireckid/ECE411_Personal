@@ -311,6 +311,7 @@ begin : state_actions
 			else if(store_funct3 == sh) mem_byte_enable = 4'b0011;
 			else mem_byte_enable = 4'b1111;
             mem_write = 1;
+			load_data_out = 1;
             end
         st2:
             begin

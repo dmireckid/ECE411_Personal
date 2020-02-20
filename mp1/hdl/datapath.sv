@@ -155,9 +155,9 @@ always_comb begin : MUXES
     // Offensive programming --- making simulation halt with a fatal message
     // warning when an unexpected mux select value occurs
     unique case (pcmux_sel)
-        pcmux::pc_plus4: pcumux_out = pc_out + 4;
+        pcmux::pc_plus4: pcmux_out = pc_out + 4;
         pcmux::alu_out: pcmux_out = alu_out;
-        pcmux::alu_mod2: pcmux_out = alu_mod2
+        pcmux::alu_mod2: pcmux_out = alu_mod2;
         default: `BAD_MUX_SEL;
     endcase
 
@@ -189,7 +189,7 @@ always_comb begin : MUXES
         default: `BAD_MUX_SEL;
     endcase
 
-    unique case (regfilemux_sel):
+    unique case (regfilemux_sel)
         regfilemux::alu_out: regfilemux_out = alu_out;
         regfilemux::br_en: regfilemux_out = zext_br;
         regfilemux::u_imm: regfilemux_out = u_imm;

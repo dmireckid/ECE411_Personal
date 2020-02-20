@@ -154,76 +154,118 @@ always_comb begin : MUXES
     // useful in SystemVerilog.  In this case, we actually use 
     // Offensive programming --- making simulation halt with a fatal message
     // warning when an unexpected mux select value occurs
-    //unique case (pcmux_sel)
-    //    pcmux::pc_plus4: pcumux_out = pc_out + 4;
-        // etc.
-    //    default: `BAD_MUX_SEL;
-    //endcase
+    unique case (pcmux_sel)
+        pcmux::pc_plus4: pcumux_out = pc_out + 4;
+        pcmux::alu_out: pcmux_out = alu_out;
+        pcmux::alu_mod2: pcmux_out = alu_mod2
+        default: `BAD_MUX_SEL;
+    endcase
+
+    unique case (alumux1_sel)
+        alumux::rs1_out: alumux1_out = rs1_out;
+        alumux::pc_out: alumux1_out = pc_out;
+        default: `BAD_MUX_SEL;
+    endcase
+
+    unique case (alumux2_sel)
+        alumux::i_imm: alumux2_out = i_imm;
+        alumux::u_imm: alumux2_out = u_imm;
+        alumux::b_imm: alumux2_out = b_imm;
+        alumux::s_imm: alumux2_out = s_imm;
+        alumux::j_imm: alumux2_out = j_imm;
+        alumux::rs2_out: alumux2_out = rs2_out;
+        default: `BAD_MUX_SEL;
+    endcase
+
+    unique case (cmpmux_sel)
+        cmpmux::rs2_out: cmpmux_out = rs2_out;
+        cmpmux::i_imm: cmpmux_out = i_imm;
+        default: `BAD_MUX_SEL;
+    endcase
+
+    unique case (marmux_sel)
+        marmux::pc_out: marmux_out = pc_out;
+        marmux::alu_out: marmux_out = alu_out;
+        default: `BAD_MUX_SEL;
+    endcase
+
+    unique case (regfilemux_sel):
+        regfilemux::alu_out: regfilemux_out = alu_out;
+        regfilemux::br_en: regfilemux_out = zext_br;
+        regfilemux::u_imm: regfilemux_out = u_imm;
+        regfilemux::pc_plus4: regfilemux_out = pc_out+4;
+        regfilemux::lw: regfilemux_out = mdrreg_out;
+        regfilemux::lh: regfilemux_out = {{17{mdrreg_out[15]}},mdrreg_out[14:0]};
+        regfilemux::lhu: regfilemux_out = {16'd0, mdrreg_out[15:0]};
+        regfilemux::lb: regfilemux_out = {{25{mdrreg_out[7]}}, mdrreg_out[6:0]};
+        regfilemux::lbu: regfilemux_out = {24'd0, mdrreg_out[7:0]};
+        default: `BAD_MUX_SEL;
+    endcase
 end
 
-fourmux pcmux(
-    .select(pcmux_sel),
-    .a(pc_plus4_out),
-    .b(alu_out),
-	.c(alu_mod2),
-	.d(),
-    .f(pcmux_out)
-);
-
-twomux alumux1(
-    .select(alumux1_sel),
-    .a(rs1_out),
-    .b(pc_out),
-    .f(alumux1_out)
-);
-
-eightmux alumux2(
-    .select(alumux2_sel),
-    .a(i_imm),
-    .b(u_imm),
-    .c(b_imm),
-    .d(s_imm),
-	.e(j_imm),
-	.f(rs2_out),
-	.g(),
-	.h(),
-    .i(alumux2_out)
-);
-
-twomux cmpmux(
-    .select(cmpmux_sel),
-    .a(rs2_out),
-    .b(i_imm),
-    .f(cmpmux_out)
-);
-
-twomux marmux(
-    .select(marmux_sel),
-    .a(pc_out),
-    .b(alu_out),
-    .f(marmux_out)
-);
-
-sixmux regfilemux(
-    .select(regfilemux_sel),
-    .a(alu_out),
-    .b(zext_br),
-    .c(u_imm),
-	.d(mdrreg_out),
-	.e(pc_plus4_out),
-    .f({{17{mdrreg_out[15]}},mdrreg_out[14:0]}),
-	.g({16'd0, mdrreg_out[15:0]}),
-    .h({{25{mdrreg_out[7]}}, mdrreg_out[6:0]}),
-	.i({24'd0, mdrreg_out[7:0]}),
-	.j(),
-	.k(),
-	.l(),
-	.m(),
-	.n(),
-	.o(),
-	.p(),
-	.q(regfilemux_out)
-);
+//fourmux pcmux(
+//    .select(pcmux_sel),
+//    .a(pc_plus4_out),
+//    .b(alu_out),
+//	.c(alu_mod2),
+//	.d(),
+//    .f(pcmux_out)
+//);
+//
+//twomux alumux1(
+//    .select(alumux1_sel),
+//    .a(rs1_out),
+//    .b(pc_out),
+//    .f(alumux1_out)
+//);
+//
+//eightmux alumux2(
+//    .select(alumux2_sel),
+//    .a(i_imm),
+//    .b(u_imm),
+//    .c(b_imm),
+//    .d(s_imm),
+//	.e(j_imm),
+//	.f(rs2_out),
+//	.g(),
+//	.h(),
+//    .i(alumux2_out)
+//);
+//
+//twomux cmpmux(
+//    .select(cmpmux_sel),
+//    .a(rs2_out),
+//    .b(i_imm),
+//    .f(cmpmux_out)
+//);
+//
+//twomux marmux(
+//    .select(marmux_sel),
+//    .a(pc_out),
+//    .b(alu_out),
+//    .f(marmux_out)
+//);
+//
+//sixmux regfilemux(
+//    .select(regfilemux_sel),
+//    .a(alu_out),
+//    .b(zext_br),
+//    .c(u_imm),
+//	.d(mdrreg_out),
+//	.e(pc_plus4_out),
+//    .f({{17{mdrreg_out[15]}},mdrreg_out[14:0]}),
+//	.g({16'd0, mdrreg_out[15:0]}),
+//    .h({{25{mdrreg_out[7]}}, mdrreg_out[6:0]}),
+//	.i({24'd0, mdrreg_out[7:0]}),
+//	.j(),
+//	.k(),
+//	.l(),
+//	.m(),
+//	.n(),
+//	.o(),
+//	.p(),
+//	.q(regfilemux_out)
+//);
 
 /*****************************************************************************/
 endmodule : datapath

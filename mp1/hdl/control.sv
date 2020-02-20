@@ -317,6 +317,9 @@ begin : state_actions
             load_pc = 1;
             //rs1_addr = rs1;
             //rs2_addr = rs2;
+            if(store_funct3 == sb) mem_byte_enable = 4'b0001;
+			else if(store_funct3 == sh) mem_byte_enable = 4'b0011;
+			else mem_byte_enable = 4'b1111;
             end
         regreg:
             begin

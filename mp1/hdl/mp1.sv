@@ -37,11 +37,6 @@ alumux::alumux2_sel_t alumux2_sel;
 regfilemux::regfilemux_sel_t regfilemux_sel;
 marmux::marmux_sel_t marmux_sel;
 cmpmux::cmpmux_sel_t cmpmux_sel;
-
-initial begin
-    rs1 = 5'b0;
-    rs2 = 5'b0;
-end
 /*****************************************************************************/
 
 /* Instantiate MP 1 top level blocks here */

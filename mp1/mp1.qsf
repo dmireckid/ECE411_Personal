@@ -77,7 +77,6 @@ set_global_assignment -name EDA_TEST_BENCH_FILE hdl/regfile.sv -section_id mp1_t
 set_global_assignment -name EDA_TEST_BENCH_FILE hdl/register.sv -section_id mp1_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE hdl/rv32i_mux_types.sv -section_id mp1_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE hdl/rv32i_types.sv -section_id mp1_tb
-set_global_assignment -name SDC_FILE mp1.out.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/rv32i_types.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/rv32i_mux_types.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/register.sv
@@ -90,4 +89,5 @@ set_global_assignment -name SYSTEMVERILOG_FILE hdl/datapath.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/control.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/cmp.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/alu.sv
+set_global_assignment -name SDC_FILE mp1.out.sdc
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

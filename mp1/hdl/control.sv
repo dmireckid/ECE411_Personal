@@ -114,7 +114,7 @@ enum int unsigned {
  *  function, then you only need to ensure that you set the load_regfile bit
  *  to 1'b1 in one place, rather than in many.
  *
- *  SystemVerilog functions must take zero "simulation time" (as opposed to 
+ *  SystemVerilog functions must take zero "simulation time" (as opposed to
  *  tasks).  Thus, they are generally synthesizable, and appropraite
  *  for design code.  Arguments to functions are, by default, input.  But
  *  may be passed as outputs, inouts, or by reference using the `ref` keyword.
@@ -272,7 +272,7 @@ begin : state_actions
             end
         calc_addr:
             begin
-            
+
             if(opcode == op_load)
                 begin
                 aluop = alu_add;
@@ -318,9 +318,9 @@ begin : state_actions
             load_pc = 1;
             //rs1_addr = rs1;
             //rs2_addr = rs2;
-            if(store_funct3 == sb) mem_byte_enable = 4'b0001;
-			else if(store_funct3 == sh) mem_byte_enable = 4'b0011;
-			else mem_byte_enable = 4'b1111;
+            //if(store_funct3 == sb) mem_byte_enable = 4'b0001;
+			         //else if(store_funct3 == sh) mem_byte_enable = 4'b0011;
+			            //else mem_byte_enable = 4'b1111;
             end
         regreg:
             begin
@@ -406,12 +406,12 @@ always_comb
 begin : next_state_logic
     /* Next state information and conditions (if any)
      * for transitioning between states */
-     if(rst) next_state = rest;
+     if(rst) next_state = fetch1;
      else next_state = state;
      case(state)
-        fetch1: 
+        fetch1:
             next_state = fetch2;
-        fetch2: 
+        fetch2:
 			if(mem_resp) next_state = fetch3;
         fetch3:
             next_state = decode;
@@ -459,10 +459,10 @@ begin : next_state_logic
             else if(opcode == op_store) next_state = st1;
             else $display("Invalid calc_addr state");
             end
-        rest:
-            begin
-            next_state = fetch1;
-            end
+        //rest:
+          //  begin
+            //next_state = fetch1;
+            //end
         default:
             next_state = fetch1;
 

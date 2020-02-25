@@ -206,7 +206,7 @@ begin : state_actions
             begin
             load_ir = 1;
             end
-        decode:
+        decode: ;
         auipc:
             begin
             load_regfile = 1;

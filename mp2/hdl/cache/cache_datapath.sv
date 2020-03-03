@@ -46,10 +46,10 @@ module cache_datapath #(
 
     output logic hit1,
     output logic hit2,
-    output logic valid_out1,
-    output logic valid_out2,
-    output logic dirty_out1,
-    output logic dirty_out2,
+    output logic valid1,
+    output logic valid2,
+    output logic dirty1,
+    output logic dirty2,
     output logic lru_out
 );
 
@@ -57,27 +57,27 @@ logic [255:0] data1,data2,data_in,cache_wout,cachemux_out;
 logic [4:0] offset, select1, select2, select3;
 logic [2:0] index;
 logic [23:0] tag1, tag2, tag_in;
-int offset_int;
+//int offset_int;
 
 assign offset = mem_address[4:0];
-assign offset_int = int'(offset);
+//assign offset_int = int'(offset);
 assign index = mem_address[7:5];
 assign tag_in = mem_address[31:8];
 
-always_comb begin
-    if (tag_in == tag1) hit1 = valid_out1;
-    if (tag_in == tag2) hit2 = valid_out2;
-    mem_rdata[7:0] = cachemux_out[((offset_int*8)+7) : (offset_int * 8)];
-    mem_rdata[15:8] = cachemux_out[(((offset_int+1)*8)+7) : ((offset_int+1) * 8)];
-    mem_rdata[23:16] = cachemux_out[(((offset_int+2)*8)+7) : ((offset_int+2) * 8)];
-    mem_rdata[31:24] = cachemux_out[(((offset_int+3)*8)+7) : ((offset_int+3) * 8)];
+always_ff begin
+    if (tag_in == tag1) hit1 = valid1;
+    if (tag_in == tag2) hit2 = valid2;
+    //assign mem_rdata[7:0] = cachemux_out[((offset*5'd8)+5'd7) : (offset * 5'd8)];
+    //assign mem_rdata[15:8] = cachemux_out[(((offset+5'd1)*5'd8)+5'd7) : ((offset+1) * 5'd8)];
+    //assign mem_rdata[23:16] = cachemux_out[(((offset+2)*5'd8)+5'd7) : ((offset+2) * 5'd8)];
+    //assign mem_rdata[31:24] = cachemux_out[(((offset+3)*5'd8)+5'd7) : ((offset+3) * 5'd8)];
 end
 
 data_array data_array1(
     .clk(clk),
     .rst(rst),
     .read(data_r1),
-    .write_en(data_w1)
+    .write_en(data_w1),
     .rindex(index),
     .windex(index),
     .datain(data_in),
@@ -87,7 +87,7 @@ data_array data_array2(
     .clk(clk),
     .rst(rst),
     .read(data_r2),
-    .write_en(data_w2)
+    .write_en(data_w2),
     .rindex(index),
     .windex(index),
     .datain(data_in),
@@ -98,7 +98,7 @@ array #(.width(24)) tag_array1(
     .clk(clk),
     .rst(rst),
     .read(read_tag1),
-    .load(load_tag1)
+    .load(load_tag1),
     .rindex(index),
     .windex(index),
     .datain(tag_in),
@@ -108,7 +108,7 @@ array #(.width(24)) tag_array2(
     .clk(clk),
     .rst(rst),
     .read(read_tag2),
-    .load(load_tag2)
+    .load(load_tag2),
     .rindex(index),
     .windex(index),
     .datain(tag_in),
@@ -119,17 +119,17 @@ array valid_array1(
     .clk(clk),
     .rst(rst),
     .read(read_valid1),
-    .load(load_valid1)
+    .load(load_valid1),
     .rindex(index),
     .windex(index),
     .datain(valid_in),
     .dataout(valid1)
 );
-array tag_array2(
+array valid_array2(
     .clk(clk),
     .rst(rst),
     .read(read_valid2),
-    .load(load_valid2)
+    .load(load_valid2),
     .rindex(index),
     .windex(index),
     .datain(valid_in),
@@ -140,7 +140,7 @@ array dirty_array1(
     .clk(clk),
     .rst(rst),
     .read(read_dirty1),
-    .load(load_dirty1)
+    .load(load_dirty1),
     .rindex(index),
     .windex(index),
     .datain(dirty_in),
@@ -150,7 +150,7 @@ array dirty_array2(
     .clk(clk),
     .rst(rst),
     .read(read_dirty2),
-    .load(load_dirty2)
+    .load(load_dirty2),
     .rindex(index),
     .windex(index),
     .datain(dirty_in),
@@ -166,7 +166,7 @@ register #(.width(256)) pmem_reg(
 );
 
 fourmux pmem_address_mux(
-    .sel(pmem_sel),
+    .select(pmem_sel),
     .a({mem_address[31:5], 5'b00000}),
     .b({tag1, index, 5'b00000}),
     .c({tag2, index, 5'b00000}),
@@ -186,7 +186,7 @@ array lru(
 );
 
 twomux #(.width(256)) cachemux(
-    .sel(path_sel),
+    .select(path_sel),
     .a(data1),
     .b(data2),
     .f(cachemux_out)
@@ -201,7 +201,7 @@ cache_writer cache_writer(
 );
 
 twomux #(.width(256)) data_mux(
-    .sel(data_sel),
+    .select(data_sel),
     .a(pmem_rdata),
     .b(cache_wout),
     .f(data_in)

@@ -10,10 +10,10 @@ module cache_control (
 	output logic pmem_write,
 	input hit1,
 	input hit2,
-	input valid_out1,
-    input valid_out2,
-    input dirty_out1,
-    input dirty_out2,
+	input valid1,
+    input valid2,
+    input dirty1,
+    input dirty2,
     input lru_out,
 	output logic data_r1,
 	output logic data_r2,
@@ -82,7 +82,7 @@ always_comb
 begin : state_actions
     /* Default output assignments */
     set_defaults();
-	case(state):
+	case(state)
 		read_write: begin
 			if(mem_read) begin
 				if(hit1) begin
@@ -173,10 +173,10 @@ begin : next_state_logic
     /* Next state information and conditions (if any)
      * for transitioning between states */
 	 next_state = state;
-	 case(state):
+	 case(state)
 		read_write: begin
-			if(valid_out1 && valid_out2) next_state = write_back;
-			else if (dirty_out2 && lru_out) next_state = write_back;
+			if(valid1 && valid2) next_state = write_back;
+			else if (dirty2 && lru_out) next_state = write_back;
 			else next_state = mem_access;
 		end
 		write_back: begin

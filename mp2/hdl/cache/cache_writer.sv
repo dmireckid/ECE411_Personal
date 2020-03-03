@@ -9,19 +9,19 @@ module cache_writer(
 );
 
 logic [7:0] byte1, byte2, byte3, byte4;
-int offset_int;
+//int offset_int;
 
-assign offset_int = int'(offset);
+//assign offset_int = int'(offset);
 
 always_comb begin
 	byte1 = mem_wdata[7:0];
 	byte2 = mem_wdata[15:8];
 	byte3 = mem_wdata[23:16];
 	byte4 = mem_wdata[31:24];
-	if(mem_byte_enable[0] == 0 && offset_int < 32) byte1 = cachemux_out[((offset_int*8)+7) : (offset_int*8)];
-	if(mem_byte_enable[1] == 0 && offset_int < 31) byte2 = cachemux_out[((offset_int*8)+15) : ((offset_int*8)+8)];
-	if(mem_byte_enable[2] == 0 && offset_int < 29) byte3 = cachemux_out[((offset_int*8)+23) : ((offset_int*8)+16)];
-	if(mem_byte_enable[3] == 0 && offset_int < 29) byte4 = cachemux_out[((offset_int*8)+31) : ((offset_int*8)+24)];
+	//if(mem_byte_enable[0] == 0 && offset < 32) byte1 = cachemux_out[((offset*5'd8)+5'd7) : (offset*5'd8)];
+	//if(mem_byte_enable[1] == 0 && offset < 31) byte2 = cachemux_out[((offset*5'd8)+5'd15) : ((offset*5'd8)+5'd8)];
+	//if(mem_byte_enable[2] == 0 && offset < 29) byte3 = cachemux_out[((offset*5'd8)+5'd23) : ((offset*5'd8)+5'd16)];
+	//if(mem_byte_enable[3] == 0 && offset < 29) byte4 = cachemux_out[((offset*5'd8)+5'd31) : ((offset*5'd8)+5'd24)];
 	if(offset == 5'b00000) cache_wout = {cachemux_out[255:32], byte4, byte3, byte2, byte1};
 	else if(offset == 5'b00001) cache_wout = {cachemux_out[255:40], byte4, byte3, byte2, byte1, cachemux_out[7:0]};
 	else if(offset == 5'b00010) cache_wout = {cachemux_out[255:48], byte4, byte3, byte2, byte1, cachemux_out[15:0]};

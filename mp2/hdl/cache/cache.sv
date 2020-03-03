@@ -27,10 +27,10 @@ module cache #(
 
 logic hit1;
 logic hit2;
-logic valid_out1;
-logic valid_out2;
-logic dirty_out1;
-logic dirty_out2;
+logic valid1;
+logic valid2;
+logic dirty1;
+logic dirty2;
 logic lru_out;
 logic [7:0] data_w1, data_w2;
 logic data_r1, data_r2;

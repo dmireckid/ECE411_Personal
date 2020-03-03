@@ -5,12 +5,16 @@ module mp2
     input clk,
     input rst,
     input pmem_resp,
-    input [63:0] pmem_rdata,
+    input [255:0] pmem_rdata,
     output logic pmem_read,
     output logic pmem_write,
     output rv32i_word pmem_address,
-    output [63:0] pmem_wdata
+    output [255:0] pmem_wdata
 );
+
+logic [3:0] mem_byte_enable;
+logic mem_read, mem_write, mem_resp;
+rv32i_word mem_address, mem_wdata, mem_rdata;
 
 // Keep cpu named `cpu` for RVFI Monitor
 // Note: you have to rename your mp2 module to `cpu`
@@ -20,8 +24,6 @@ cpu cpu(.*);
 cache cache(.*);
 
 // From MP0
-cacheline_adaptor cacheline_adaptor
-(
-);
+//cacheline_adaptor cacheline_adaptor();
 
 endmodule : mp2

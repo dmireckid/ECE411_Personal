@@ -10,6 +10,7 @@ module cache #(
     input clk,
     input rst,
     input rv32i_mem_wmask mem_byte_enable,
+
     input rv32i_word mem_address,
     input rv32i_word mem_wdata,
     input mem_read,
@@ -58,7 +59,7 @@ cache_datapath datapath
 );
 
 bus_adapter bus_adapter
-(
+(.*
 );
 
 endmodule : cache

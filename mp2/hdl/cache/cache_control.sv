@@ -105,28 +105,28 @@ begin : state_actions
 				end
 			end
 
-			else if(mem_write) begin
-				if(hit1) begin
-					mem_resp = 1;
-					load_lru = 1;
-					lru_in = 1;
-					path_sel = 0;
-					dirty_in = 1;
-					load_dirty1 = 1;
-					data_r1 = 1;
-					data_sel = 1;
-				end
-				else if(hit2) begin
-					mem_resp = 1;
-					load_lru = 1;
-					lru_in = 0;
-					path_sel = 1;
-					dirty_in = 1;
-					load_dirty2 = 1;
-					data_r2 = 1;
-					data_sel = 1;
-				end
-			end
+			//else if(mem_write) begin
+			//	if(hit1) begin
+			//		mem_resp = 1;
+			//		load_lru = 1;
+			//		lru_in = 1;
+			//		path_sel = 0;
+			//		dirty_in = 1;
+			//		load_dirty1 = 1;
+			//		data_r1 = 1;
+			//		data_sel = 1;
+			//	end
+			//	else if(hit2) begin
+			//		mem_resp = 1;
+			//		load_lru = 1;
+			//		lru_in = 0;
+			//		path_sel = 1;
+			//		dirty_in = 1;
+			//		load_dirty2 = 1;
+			//		data_r2 = 1;
+			//		data_sel = 1;
+			//	end
+			//end
 		end
 
 		write_back: begin

@@ -41,13 +41,21 @@ enum int unsigned{
   winish
 } state, next_state;
 
-always_comb
+function void set_defaults();
+	  read_o = 0;
+      write_o = 0;
+      resp_o = 0;
+		address_o = address_i;
+		burst_o = 64'b0;
+		burst0 = 64'b0;
+		burst1 = 64'b0;
+		burst2 = 64'b0;
+		burst3 = 64'b0;
+endfunction
+
+always_latch
 begin : state_actions
-  if(reset_n) begin
-    read_o = 0;
-    write_o = 0;
-    resp_o = 0;
-  end
+	set_defaults();
   case(state)
     idle: begin
       read_o = 0;
@@ -57,10 +65,12 @@ begin : state_actions
     start_r: begin
       address_o = address_i;
       read_o = 1;
+	  write_o = 0;
     end
     start_w: begin
       address_o = address_i;
       write_o = 1;
+	  read_o =0;
     end
     r_burst0: begin
       burst0 = burst_i;
@@ -92,7 +102,7 @@ begin : state_actions
     end
     w_burst3: begin
       burst_o = line_i[255:192];
-      //$display("Write 0 is: %h", burst_o);
+      //$display("Write 3 is: %h", burst_o);
     end
     winish: begin
       write_o = 0;
@@ -109,7 +119,8 @@ end
 
 always_comb
 begin : next_state_logic
-  next_state = state;
+  if(reset_n) next_state = idle;
+  else next_state = state;
   case(state)
     idle: begin
       if(read_i == 1) next_state = start_r;

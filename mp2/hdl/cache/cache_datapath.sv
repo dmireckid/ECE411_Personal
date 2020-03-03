@@ -30,9 +30,9 @@ module cache_datapath #(
     input logic dirty_in,
     input logic lru_in,
 
-    input rv32i_mem_wmask mem_byte_enable,
+    input [31:0] mem_byte_enable256,
     input rv32i_word mem_address,
-    input rv32i_word mem_wdata,
+    input [255:0] mem_wdata256,
     input [255:0] pmem_rdata,
 
     input logic data_sel,
@@ -42,7 +42,7 @@ module cache_datapath #(
     
     output rv32i_word pmem_address,
     output [255:0] pmem_wdata,
-    output rv32i_word mem_rdata,
+    output [255:0] mem_rdata256,
 
     output logic hit1,
     output logic hit2,
@@ -64,14 +64,28 @@ assign offset = mem_address[4:0];
 assign index = mem_address[7:5];
 assign tag_in = mem_address[31:8];
 
-always_ff begin
+/*always_ff begin
     if (tag_in == tag1) hit1 = valid1;
     if (tag_in == tag2) hit2 = valid2;
     //assign mem_rdata[7:0] = cachemux_out[((offset*5'd8)+5'd7) : (offset * 5'd8)];
     //assign mem_rdata[15:8] = cachemux_out[(((offset+5'd1)*5'd8)+5'd7) : ((offset+1) * 5'd8)];
     //assign mem_rdata[23:16] = cachemux_out[(((offset+2)*5'd8)+5'd7) : ((offset+2) * 5'd8)];
     //assign mem_rdata[31:24] = cachemux_out[(((offset+3)*5'd8)+5'd7) : ((offset+3) * 5'd8)];
-end
+end*/
+
+compare compare1(
+	.tagin(tag_in),
+	.tag(tag1),
+	.valid(valid1),
+	.hit(hit1)
+);
+
+compare compare2(
+	.tagin(tag_in),
+	.tag(tag1),
+	.valid(valid2),
+	.hit(hit2)
+);
 
 data_array data_array1(
     .clk(clk),
